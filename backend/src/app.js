@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
-// import userRouter from "./routes/User.route.js"
+import userRouter from "./routes/User.routes.js"
 // import adminRouter from "./routes/Admin.route.js"
 
 
@@ -13,12 +13,12 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 app.use(cors({
-    origin: ['https://food-delivery-app-rose.vercel.app', 'http://localhost:5173'],
+    origin: process.env.CORS_ORIGIN,
     credentials: true,
 }))
 
 // app.use("/api/v1/", adminRouter)
 
-// app.use("/api/v1/users", userRouter)
+app.use("/api/v1/users", userRouter)
 
 export { app };
