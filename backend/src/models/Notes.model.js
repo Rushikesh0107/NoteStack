@@ -12,14 +12,18 @@ const notesSchema = new Schema({
         trim: true,
     },
     department: {
-        type: Schema.Types.ObjectId,
-        ref: "department",
+        type: String,
+        //ref: "department",
     },
     semester: {
-        type: Schema.Types.ObjectId,
-        ref: "semester",
+        type: String,
+        //ref: "semester",
     },
     subject: {
+        type: String,
+        required: true,
+    },
+    module: {
         type: String,
         required: true,
     },
@@ -30,10 +34,7 @@ const notesSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
         ref: "user",
-    },
-    semester: {
-        type: Schema.Types.ObjectId,
-        ref: "semester",
+        required: true
     },
 }, {timestamps: true});
 

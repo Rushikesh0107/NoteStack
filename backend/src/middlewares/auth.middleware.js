@@ -19,7 +19,6 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
         if(!user){
             throw new ApiErrors(401, "Access Denied")
         }
-
         req.user = user;
         next();
     } catch (error) {
