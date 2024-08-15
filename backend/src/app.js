@@ -2,8 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import userRouter from "./routes/User.routes.js"
-import notesRouter from "./routes/Notes.route.js"
-// import adminRouter from "./routes/Admin.route.js"
+import adminRouter from "./routes/Admin.route.js"
 
 
 const app = express();
@@ -18,10 +17,8 @@ app.use(cors({
     credentials: true,
 }))
 
-// app.use("/api/v1/", adminRouter)
+app.use("/api/v1/admin", adminRouter)
 
 app.use("/api/v1/users", userRouter)
-
-app.use("/api/v1/notes", notesRouter)
 
 export { app };

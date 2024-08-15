@@ -1,7 +1,7 @@
 import mongoose, {Schema} from 'mongoose';
 
 const pyqSchema = new Schema({
-    title: {
+    year: {
         type: String,
         required: true,
         trim: true,
@@ -12,21 +12,19 @@ const pyqSchema = new Schema({
         trim: true,
     },
     subject: {
-        type: String,
+        type: Schema.Types.ObjectId,
+        ref: "subject",
         required: true,
     },
     department: {
         type: Schema.Types.ObjectId,
         ref: "department",
+        required: true,
     },
     semester: {
-        type: Schema.Types.ObjectId,
-        ref: "semester",
-    },
-    verified: {
-        type: Boolean,
-        default: false,
-    },
+        type: String,
+        required: true,
+    }
 }, {timestamps: true});
 
 export const Pyq = mongoose.model("pyq", pyqSchema);
