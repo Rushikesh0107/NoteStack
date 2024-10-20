@@ -137,7 +137,7 @@ export const register = (username, password, email, fullname, navigate) => {
             dispatch(setLoading(false));
             toast.dismiss(toastId);
             toast.success("Register Successfull");
-            navigate("/address")
+            navigate("/")
             window.location.reload();
         } catch (error){
             toast.error(error.response?.data?.message)
