@@ -4,7 +4,8 @@ import {
         removeSubject,
         uploadPyq,
         addDepartment,
-        verifyNotes
+        verifyNotes,
+        adminLogin,
         } from "../controllers/Admin.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { verifyAdmin } from "../middlewares/verifyAdmin.js";
@@ -29,5 +30,7 @@ router.route("/upload-pyq").post(
     ]),uploadPyq);
 
 router.route("/verify-notes/:_id").post(verifyJWT, verifyAdmin, verifyNotes);
+
+router.route("/admin-login").post(adminLogin);
 
 export default router;

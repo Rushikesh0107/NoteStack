@@ -5,8 +5,9 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { Notes } from "../models/Notes.model.js";
 import jwt from "jsonwebtoken";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { Subject } from "../models/Subject.model.js";
 
-const generateAccessAndRefreshToken = async (id) => {
+export const generateAccessAndRefreshToken = async (id) => {
     try {
         const user = await User.findById(id)
         const accessToken = user.generateAccessToken();
@@ -83,6 +84,8 @@ export const registerUser = asyncHandler(async (req, res) => {
 
 export const loginUser = asyncHandler (async (req, res) => {
     const {username, password} = req.body;
+
+    console.log("LOGIN USER API", req.body);
     
     if(!(username)){
         throw new ApiResponse(400, {}, "Username is required")
@@ -92,61 +95,69 @@ export const loginUser = asyncHandler (async (req, res) => {
         throw new ApiErrors(400, "Password is required")
     }
 
-    const user = await User.findOne({
-        $or: [{username}]
-    })
+    try{
 
-    if(!user){
-        return res
-        .status(400)
-        .json(
-            new ApiResponse(
-                400,
-                {},
-                "User not found"
-            )
-        )
-    }
-
-    const isPasswordCorrect = await user.isPasswordCorrect(password);
-    //console.log(isPasswordCorrect);
-
-    if(!isPasswordCorrect){
-        //throw new ApiErrors(400, "Password is not correct")
-        return res
-        .status(400)
-        .json(
-            new ApiResponse(
-                400,
-                {},
-                "Password is not correct"
-            )
-        )
-    }
-
-
-    const {accessToken, refreshToken} = await generateAccessAndRefreshToken(user._id)
+        const user = await User.findOne({
+            $or: [{username}]
+        })
     
-    const logedInUser = await User.findById(user._id).select("-password -refreshToken");
+        if(!user){
+            return res
+            .status(400)
+            .json(
+                new ApiResponse(
+                    400,
+                    {},
+                    "User not found"
+                )
+            )
+        }
+    
+        const isPasswordCorrect = await user.isPasswordCorrect(password);
+        //console.log(isPasswordCorrect);
+    
+        if(!isPasswordCorrect){
+            //throw new ApiErrors(400, "Password is not correct")
+            return res
+            .status(400)
+            .json(
+                new ApiResponse(
+                    400,
+                    {},
+                    "Password is not correct"
+                )
+            )
+        }
+    
+    
+        const {accessToken, refreshToken} = await generateAccessAndRefreshToken(user._id)
+        
+        const logedInUser = await User.findById(user._id).select("-password -refreshToken");
+    
+        const option = {
+            httpOnly: true,
+        }
+    
+        return res
+        .status(200)
+        .cookie("refreshToken", refreshToken, option)
+        .cookie("accessToken", accessToken, option)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    user: logedInUser,
+                    accessToken
+                },
+                "User loged in successfully"
+            )
+        )
 
-    const option = {
-        httpOnly: true,
+    } catch (e) {
+        throw new ApiErrors(400, error || "Something went wrong while logging in...")
     }
 
-    return res
-    .status(200)
-    .cookie("refreshToken", refreshToken, option)
-    .cookie("accessToken", accessToken, option)
-    .json(
-        new ApiResponse(
-            200,
-            {
-                user: logedInUser,
-                accessToken
-            },
-            "User loged in successfully"
-        )
-    )
+    
 })
 
 export const logoutUser = asyncHandler(async (req, res) => {

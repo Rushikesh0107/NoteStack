@@ -5,7 +5,9 @@ import { Pyq } from "../models/Pyq.model.js";
 import { Subject } from "../models/Subject.model.js";
 import { Department } from "../models/Department.model.js";
 import {Notes} from "../models/Notes.model.js"
+import { User } from "../models/User.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {generateAccessAndRefreshToken} from "../controllers/User.controller.js"
 
 export const uploadPyq = asyncHandler(async (req, res) => {
     try {
@@ -203,6 +205,64 @@ export const verifyNotes = asyncHandler(async (req, res) => {
 
     } catch (error) {
         throw new ApiErrors(400, error || "Something went wrong while verifying notes")
+    }
+})
+
+export const adminLogin = asyncHandler(async (req, res) => {
+    try {
+        const {username, password} = req.body;
+
+        if(!(username && password)){
+            throw new ApiResponse(400, {}, "All fields are required")
+        }
+
+        const user = await User.findOne({
+            $or: [{username}]
+        })
+
+        if(!user){
+            throw new ApiResponse(400, {}, "User not found")
+        }
+
+        if(user.role !== "admin"){
+            throw new ApiResponse(400, {}, "You are not an admin")
+        }
+
+        if(user.isAdmin === false){
+            throw new ApiResponse(400, {}, "You are not an admin")
+        }
+
+        const isPasswordCorrect = await user.isPasswordCorrect(password);
+
+        if(!isPasswordCorrect){
+            throw new ApiResponse(400, {}, "Invalid credentials")
+        }
+
+        const {accessToken, refreshToken} = await generateAccessAndRefreshToken(user._id);
+
+        const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+
+        const option = {
+            httpOnly: true,
+        }
+
+        return res
+        .status(200)
+        .cookie("refreshToken", refreshToken, option)
+        .cookie("accessToken", accessToken, option)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    user: loggedInUser,
+                    accessToken
+                },
+                "Login successfull"
+            )
+        )
+
+    } catch (error) {
+        throw new ApiErrors(400, error || "Something went wrong while logging in")
     }
 })
 
